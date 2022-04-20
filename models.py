@@ -11,7 +11,7 @@ import preprocessingfile as preprocess
 def NN(original_data, original_X, original_Y,combined_training_data,x_train1,x_train2,x_train,x_test,x_val,y_train1,y_train2,y_train,y_test,y_val):   
     # Importing the Keras libraries and packages
     import keras
-    from keras.models import Sequential
+    from tensorflow.keras.module.module import Sequential
     from keras.layers import Dense
     
     # Initialising the ANN
