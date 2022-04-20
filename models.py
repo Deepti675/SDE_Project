@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec 14 01:13:37 2018
-
-@author: Rituraj
-"""
 import pandas as pd
 import preprocessingfile as preprocess
 #original_data, original_X, original_Y,combined_training_data,x_train1,x_train2,x_train,x_test,x_val,y_train1,y_train2,y_train,y_test,y_val = preprocess.my_sdp_preprocessor('pc2.csv')
