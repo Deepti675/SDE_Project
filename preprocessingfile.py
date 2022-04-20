@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec 14 00:19:45 2018
-
-@author: Rituraj
-"""
 
 #Software Defect Prediction
 
