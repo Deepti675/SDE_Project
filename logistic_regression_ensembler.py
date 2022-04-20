@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Dec 15 14:08:40 2018
-
-@author: Rituraj
-"""
 
 import pandas as pd
 import performance_check as ensembler
