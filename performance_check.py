@@ -1,95 +1,98 @@
 
+#Software Defect Prediction using CNN
+
+#importing numpy
+import numpy as np
+#importing pandas
 import pandas as pd
-import preprocessingfile as preprocess
-import models
+#importing RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
+#importing train_test_split
+from sklearn.model_selection import train_test_split
+#importing matplotlib
+import matplotlib.pyplot as plt
+#importing recall_score
+from sklearn.metrics import recall_score
+#importing the sns package
+import seaborn as sns
+#importing under_sampling
+from imblearn import under_sampling 
+#importing sys
+import sys
+#importing over_sampling
+from imblearn import over_sampling
+from sklearn.preprocessing import MinMaxScaler
+#importing SMOTE
+from imblearn.over_sampling import SMOTE
 
-data = 'pc2.csv'
-original_data, original_X, original_Y,combined_training_data,x_train1,x_train2,x_train,x_test,x_val,y_train1,y_train2,y_train,y_test,y_val = preprocess.my_sdp_preprocessor(data)
-all_data = [original_data, original_X, original_Y,combined_training_data,x_train1,x_train2,x_train,x_test,x_val,y_train1,y_train2,y_train,y_test,y_val]
-
-
-cnn_clf = models.cnn(*all_data) 
-svm_clf = models.svm(*all_data)
-#rf_clf = models.random_forest(*all_data)
-#nn_clf = models.NN(*all_data)
-
-
-from sklearn.metrics import *
-
-def print_accuracy(model): #nn,cnn,svm,clf
-    '''if (model == nn_clf):
-        y_pred_on_val = model.predict(x_val)>0.5
-        y_pred_on_test = model.predict(x_test)>0.5'''
-    #elif (model == cnn_clf):
-    if (model == cnn_clf):
-        x_val_matrix = x_val.values
-        x_val1 = x_val_matrix.reshape(x_val_matrix.shape[0], 1, len(x_val.columns), 1)
-        y_pred_on_val = model.predict(x_val1)>0.5
-        x_test_matrix = x_test.values
-        x_test1 = x_test_matrix.reshape(x_test_matrix.shape[0], 1, len(x_test.columns), 1)
-        y_pred_on_test = model.predict(x_test1)>0.5
-    else:
-        y_pred_on_val = model.predict(x_val)
-        y_pred_on_test = model.predict(x_test)
-        
-    print('******', str(model), '******')   
-    print('||Validation Set||')
-    print('Accuracy:',balanced_accuracy_score(y_val,y_pred_on_val))
-    print('Avg Precision:', average_precision_score(y_val,y_pred_on_val))
-    print('f1_score:', f1_score(y_val,y_pred_on_val))
-    print('Precision:', precision_score(y_val,y_pred_on_val))
-    print('Recall:', recall_score(y_val, y_pred_on_val))
-    print('ROC_AUC:',roc_auc_score(y_val,y_pred_on_val))
-    print('||Test Set||')
-    print('Accuracy:',balanced_accuracy_score(y_test,y_pred_on_test))
-    print('Avg Precision:', average_precision_score(y_test,y_pred_on_test))
-    print('f1_score:', f1_score(y_test,y_pred_on_test))
-    print('Precision:', precision_score(y_test,y_pred_on_test))
-    print('Recall:', recall_score(y_test, y_pred_on_test))
-    print('ROC_AUC:',roc_auc_score(y_test,y_pred_on_test))
-    y_pred_on_val_df = pd.DataFrame(y_pred_on_val, columns=['defects1'])
-    y_pred_on_test_df = pd.DataFrame(y_pred_on_test, columns=['defects1'])
-    val_result = pd.concat([y_val['defects'].reset_index(drop=True), y_pred_on_val_df['defects1']],axis=1)
-    val_result = val_result.rename(columns={'defects':'val_actual', 'defects1':'val_predict'})
-    test_result = pd.concat([y_test['defects'].reset_index(drop=True),y_pred_on_test_df['defects1']],axis=1)
-    test_result = test_result.rename(columns={'defects':'test_actual','defects1':'test_predict'})
-    return val_result, test_result
-
-
-svm_val_result, svm_test_result = print_accuracy(svm_clf)
-#rf_val_result, rf_test_result = print_accuracy(rf_clf)
-#nn_val_result, nn_test_result = print_accuracy(nn_clf)
-cnn_val_result, cnn_test_result = print_accuracy(cnn_clf)
-
-
-#new_val_set_x = pd.concat([svm_val_result['val_predict'],rf_val_result['val_predict'],nn_val_result['val_predict'],cnn_val_result['val_predict']],axis=1)
-new_val_set_x = pd.concat([svm_val_result['val_predict'],cnn_val_result['val_predict']],axis=1)
-new_val_set_x_matrix = new_val_set_x.values
-new_val_set_y_matrix = svm_val_result['val_actual'].values
-
-#new_test_set_x = pd.concat([svm_test_result['test_predict'],rf_test_result['test_predict'],nn_test_result['test_predict'],cnn_test_result['test_predict']],axis=1)
-new_test_set_x = pd.concat([svm_test_result['test_predict'],cnn_test_result['test_predict']],axis=1)
-new_test_set_x_matrix = new_test_set_x.values
-new_test_set_y_matrix = svm_test_result['test_actual'].values
-
-
-def send_classifiers_to_LR_file():
-    #return nn_clf, cnn_clf, svm_clf, rf_clf
-    return cnn_clf, svm_clf
-
-from sklearn.linear_model import LogisticRegression
-def send_results_to_logistic_regression():
-    clf = LogisticRegression(random_state=0)
-    clf.fit(new_val_set_x_matrix, new_val_set_y_matrix)
-    #yyy = clf.predict(new_test_set_x_matrix)
-    #accuracy_score(y_test.values,yyy)
-    return clf, new_test_set_x_matrix 
-
-
-
-
-
-
-
-
+#a dataset normalisation and feature selection function should be added
+#calling to my_sdp_preprocessor with the dataset collected
+def my_sdp_preprocessor(datafilename_as_csv_inquotes):
+    #reading the original data file
+    actual_data = pd.read_csv(datafilename_as_csv_inquotes)
+    #removing the null values from the data
+    actual_data.dropna(axis='columns')
+    actual_data.isnull().values.any() #Gives false ie:No null value in dataset
+    #Fill NA/NaN values using the specified method.
+    actual_data = actual_data.fillna(value=False)
+    actual_data = MinMaxScaler(missing_values = np.nan, strategy = 'mean')
+    #actual_data sum for isnull valus=es
+    actual_data.isnull().sum()
+    #droping the defects column form the dataset
+    original_X = pd.DataFrame(actual_data.drop(['defects'],axis=1))
+    #adding defects dataset column to original_Y
+    array = actual_data.values
+    original_Y = actual_data['defects']
+    #loading the dataframe to original_Y
+    array = MinMaxScaler(feature_range=(0, 1))
+    original_Y = pd.DataFrame(original_Y)
+    #performing drop
+    actual_data.dropna(axis='columns')
+    i = 1
+    while i < 6:
+        #print(i)
+        i += 1
+    #splitting the dataset
+    x_train1, x_test, y_train1, y_test= train_test_split(original_X, original_Y, test_size = .1,
+                                                              random_state=12)
+    from sklearn.impute import SimpleImputer
+    # To replace the missing value we create below object of SimpleImputer class
+    actual_data = SimpleImputer(missing_values = np.nan, strategy = 'mean')
+    #We now resample, and from that we generate training and validation data.
+    array = actual_data.values
+    sm = SMOTE(random_state=12, sampling_strategy = 1.0)
+    #fir_resample of the data
+    x, y = sm.fit_resample(x_train1, y_train1)
+    array = MinMaxScaler(feature_range=(0, 1))
+    #adding the defect column to y_train2
+    #fitting the data
+    actual_data.fit(x[:, 1:3])
+    y_train2 = pd.DataFrame(y, columns=['defects'])
+    #loading the original_X.columns to the x_train2
+    x_train2 = pd.DataFrame(x, columns=original_X.columns)
+    k = 1
+    while i < 6:
+        #print(i)
+        k += 1
+    #splliting the dataset infoto x_train2 and y_train2
+    x_train, x_val, y_train, y_val= train_test_split(x_train2, y_train2, test_size = .1,
+                                                              random_state=12)
+    
+    #copying the x_train data to combined_training data
+    combined_training_data = x_train.copy()
+    #putting the value of y_train data to combined training data
+    combined_training_data['defects'] = y_train
+    
+    
+    
+    #combined training data to correction
+    corr = combined_training_data.corr()
+    combined_training_data.loc[:, :] = np.tril(combined_training_data, k=-1)
+    cor_pairs = combined_training_data.stack()
+    #loading to heatmap
+    sns.heatmap(corr, xticklabels=corr.columns,yticklabels=corr.columns)
+    #getting the core_pair of actual data
+    cor_pairs = np.tril(actual_data)
+    #returning the data
+    return actual_data, original_X, original_Y,combined_training_data,x_train1,x_train2,x_train,x_test,x_val,y_train1,y_train2,y_train,y_test,y_val 
 
